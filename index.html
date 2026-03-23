@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ambassia — Outil interne</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#F4F6FB;
+  --white:#FFFFFF;
+  --s1:#EEF1F8;
+  --s2:#E4E8F4;
+  --ink:#0B1540;
+  --ink2:#3D4E7A;
+  --ink3:#7B89AD;
+  --border:#DDE2EF;
+  --blue:#1A6BFF;
+  --blue-l:#EEF3FF;
+  --blue-m:#C5D3FF;
+  --green:#0A9E6A;
+  --green-l:#E6F7F1;
+  --red:#D93025;
+  --red-l:#FEF0EF;
+}
+html,body{height:100%;font-size:14px;}
+body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif;line-height:1.6;display:flex;flex-direction:column;}
+
+/* LAYOUT */
+.layout{display:flex;flex:1;min-height:100vh;}
+
+/* SIDEBAR */
+.sidebar{
+  width:230px;flex-shrink:0;background:var(--white);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+}
+.sb-top{padding:22px 18px 16px;border-bottom:1px solid var(--border);}
+.logo{font-family:'Syne',sans-serif;font-weight:800;font-size:18px;color:var(--ink);}
+.logo em{font-style:normal;color:var(--blue);}
+.logo-sub{font-size:10px;color:var(--ink3);letter-spacing:.1em;text-transform:uppercase;margin-top:3px;}
+.sb-nav{padding:14px 10px;flex:1;}
+.nav-label{font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);padding:0 8px;margin:12px 0 6px;}
+.nav-label:first-child{margin-top:0;}
+.nav-btn{
+  width:100%;display:flex;align-items:center;gap:9px;
+  padding:9px 10px;border-radius:8px;border:none;background:none;
+  font-family:'DM Sans',sans-serif;font-size:13px;font-weight:400;
+  color:var(--ink2);cursor:pointer;transition:all .15s;text-align:left;
+  margin-bottom:2px;
+}
+.nav-btn:hover{background:var(--s1);color:var(--ink);}
+.nav-btn.active{background:var(--blue-l);color:var(--blue);font-weight:500;border:1px solid var(--blue-m);}
+.nav-icon{font-size:15px;width:20px;text-align:center;flex-shrink:0;}
+
+.sb-key{padding:14px 14px 18px;border-top:1px solid var(--border);}
+.sb-key-label{font-size:11px;font-weight:500;color:var(--ink3);margin-bottom:6px;}
+.sb-key input{
+  width:100%;padding:9px 12px;
+  background:var(--s1);border:1px solid var(--border);border-radius:7px;
+  font-size:11px;font-family:'DM Sans',sans-serif;color:var(--ink);outline:none;
+}
+.sb-key input:focus{border-color:var(--blue);}
+.sb-key-hint{font-size:10px;color:var(--ink3);margin-top:5px;line-height:1.5;}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;min-width:0;}
+
+/* TOPBAR */
+.topbar{
+  background:var(--white);border-bottom:1px solid var(--border);
+  padding:14px 28px;display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;position:sticky;top:0;z-index:10;
+}
+.tb-info{}
+.tb-title{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;letter-spacing:-.2px;}
+.tb-sub{font-size:11px;color:var(--ink3);margin-top:1px;}
+.tb-btns{display:flex;gap:8px;}
+.btn{
+  padding:9px 18px;border-radius:8px;font-size:13px;font-weight:500;
+  cursor:pointer;border:none;font-family:'DM Sans',sans-serif;
+  transition:all .15s;display:inline-flex;align-items:center;gap:6px;
+}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--ink2);}
+.btn-outline:hover{border-color:var(--ink2);color:var(--ink);}
+.btn-primary{background:var(--blue);color:#fff;}
+.btn-primary:hover{background:#1558DD;}
+.btn-primary:disabled{background:var(--s2);color:var(--ink3);cursor:not-allowed;}
+
+/* CONTENT */
+.content{flex:1;padding:24px 28px;overflow-y:auto;}
+.page{display:none;}
+.page.active{display:block;}
+
+/* TWO COL */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start;}
+
+/* CARDS */
+.card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:12px;padding:20px 22px;margin-bottom:14px;
+}
+.card:last-child{margin-bottom:0;}
+.card-title{
+  font-family:'Syne',sans-serif;font-weight:700;font-size:13px;
+  letter-spacing:-.1px;margin-bottom:16px;
+  display:flex;align-items:center;gap:8px;color:var(--ink);
+}
+.card-title-icon{
+  width:26px;height:26px;border-radius:7px;background:var(--blue-l);
+  display:flex;align-items:center;justify-content:center;font-size:13px;
+}
+
+/* FIELDS */
+.fg{display:grid;gap:12px;margin-bottom:12px;}
+.fg.c2{grid-template-columns:1fr 1fr;}
+.fg.c3{grid-template-columns:1fr 1fr 1fr;}
+.fg.c1{grid-template-columns:1fr;}
+.fg:last-child{margin-bottom:0;}
+
+.field{}
+.fl{font-size:11px;font-weight:500;color:var(--ink3);margin-bottom:5px;display:block;}
+.fl .req{color:var(--blue);}
+
+input[type=text],input[type=number],select,textarea{
+  width:100%;padding:9px 12px;
+  background:var(--s1);border:1px solid var(--border);border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-size:13px;color:var(--ink);
+  outline:none;transition:border-color .15s;
+  -webkit-appearance:none;appearance:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--blue);background:var(--white);}
+input::placeholder,textarea::placeholder{color:var(--ink3);}
+textarea{resize:vertical;min-height:72px;line-height:1.5;}
+select{cursor:pointer;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%237B89AD' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;}
+select option{background:white;color:var(--ink);}
+
+/* RADIO CARDS */
+.rc-grid{display:grid;gap:8px;}
+.rc-grid.c2{grid-template-columns:1fr 1fr;}
+.rc-grid.c3{grid-template-columns:1fr 1fr 1fr;}
+.rc{
+  border:1.5px solid var(--border);border-radius:8px;padding:10px 12px;
+  cursor:pointer;transition:all .15s;background:var(--white);
+}
+.rc:hover{border-color:var(--blue-m);background:var(--blue-l);}
+.rc.on{border-color:var(--blue);background:var(--blue-l);}
+.rc-title{font-size:13px;font-weight:500;color:var(--ink2);}
+.rc.on .rc-title{color:var(--blue);}
+.rc-sub{font-size:11px;color:var(--ink3);margin-top:1px;}
+.rc.on .rc-sub{color:var(--blue);opacity:.7;}
+
+/* RESULT PANEL */
+.result-card{
+  background:var(--white);border:1px solid var(--border);
+  border-radius:12px;overflow:hidden;
+  position:sticky;top:72px;
+}
+.rc-head{
+  padding:13px 18px;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--s1);
+}
+.rc-head-title{font-size:12px;font-weight:600;color:var(--ink2);letter-spacing:.02em;}
+.rc-head-actions{display:flex;gap:6px;}
+.rc-body{padding:20px;min-height:300px;max-height:75vh;overflow-y:auto;}
+
+/* STATES */
+.state-empty{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:48px 20px;color:var(--ink3);text-align:center;gap:10px;
+  min-height:260px;
+}
+.state-empty-icon{font-size:36px;opacity:.35;}
+.state-empty-text{font-size:13px;line-height:1.6;}
+
+.state-loading{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:48px;gap:14px;min-height:260px;
+}
+.dots{display:flex;gap:5px;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--blue);}
+.dot{animation:blink 1.2s ease-in-out infinite;opacity:.25;}
+.dot:nth-child(1){animation-delay:0s;}
+.dot:nth-child(2){animation-delay:.2s;}
+.dot:nth-child(3){animation-delay:.4s;}
+@keyframes blink{0%,100%{opacity:.25;}50%{opacity:1;}}
+.loading-text{font-size:12px;color:var(--ink3);}
+
+/* GENERATED */
+.gen{font-size:13px;color:var(--ink2);line-height:1.8;}
+.gen h2{font-family:'Syne',sans-serif;font-weight:700;font-size:14px;color:var(--blue);margin:20px 0 8px;letter-spacing:-.1px;}
+.gen h2:first-child{margin-top:0;}
+.gen h3{font-size:13px;font-weight:600;color:var(--ink);margin:12px 0 5px;}
+.gen ul{padding-left:18px;margin:4px 0 8px;}
+.gen li{margin-bottom:4px;}
+.gen strong{color:var(--ink);font-weight:600;}
+.gen p{margin-bottom:8px;}
+.gen hr{border:none;border-top:1px solid var(--border);margin:14px 0;}
+
+/* COPY BTN */
+.copy-btn{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:6px;font-size:11px;font-weight:500;
+  background:var(--white);border:1px solid var(--border);color:var(--ink2);
+  cursor:pointer;transition:all .15s;
+}
+.copy-btn:hover{border-color:var(--blue);color:var(--blue);}
+.copy-btn.ok{border-color:var(--green);color:var(--green);}
+
+/* DEVIS RECAP */
+.devis-recap{
+  background:var(--s1);border:1px solid var(--border);
+  border-radius:10px;padding:16px;margin-top:10px;
+}
+.dr-row{display:flex;justify-content:space-between;align-items:baseline;padding:5px 0;border-bottom:1px solid var(--border);}
+.dr-row:last-child{border-bottom:none;padding-top:12px;margin-top:4px;}
+.dr-label{font-size:12px;color:var(--ink2);}
+.dr-val{font-size:13px;font-weight:500;color:var(--ink);}
+.dr-total{font-family:'Syne',sans-serif;font-weight:800;font-size:26px;color:var(--blue);letter-spacing:-.5px;}
+.dr-acq{color:var(--green);font-weight:600;}
+
+/* ALERT */
+.alert{
+  padding:10px 14px;border-radius:8px;font-size:12px;margin-bottom:14px;
+  display:none;
+}
+.alert.error{background:var(--red-l);border:1px solid rgba(217,48,37,.2);color:var(--red);}
+.alert.show{display:block;}
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sb-top">
+      <div class="logo">Ambass<em>ia</em></div>
+      <div class="logo-sub">Outil interne</div>
+    </div>
+    <nav class="sb-nav">
+      <div class="nav-label">Modules</div>
+      <button class="nav-btn active" onclick="goPage('campagne', this)">
+        <span class="nav-icon">🗺️</span> Builder campagne
+      </button>
+      <button class="nav-btn" onclick="goPage('fiche', this)">
+        <span class="nav-icon">📋</span> Fiche mission
+      </button>
+      <button class="nav-btn" onclick="goPage('devis', this)">
+        <span class="nav-icon">💶</span> Devis client
+      </button>
+    </nav>
+    <div class="sb-key">
+      <div class="sb-key-hint" style="text-align:center">
+        ⚡ Connecté à Claude via<br>Netlify Functions
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <div class="main">
+
+    <!-- ══════════════════════════════════
+         PAGE : BUILDER CAMPAGNE
+    ══════════════════════════════════ -->
+    <div id="pg-campagne" class="page active">
+      <div class="topbar">
+        <div class="tb-info">
+          <div class="tb-title">Builder de campagne</div>
+          <div class="tb-sub">Plan complet · Répartition campus · Planning · KPIs</div>
+        </div>
+        <div class="tb-btns">
+          <button class="btn btn-outline" onclick="resetPage('campagne')">Réinitialiser</button>
+          <button class="btn btn-primary" id="cta-campagne" onclick="runCampagne()">✨ Générer</button>
+        </div>
+      </div>
+      <div class="content">
+        <div id="alert-campagne" class="alert error"></div>
+        <div class="two-col">
+          <div>
+            <div class="card">
+              <div class="card-title"><div class="card-title-icon">🏢</div> Client</div>
+              <div class="fg c2">
+                <div class="field">
+                  <label class="fl">Marque <span class="req">*</span></label>
+                  <input type="text" id="cc-marque" placeholder="Lydia, Doctolib...">
+                </div>
+                <div class="field">
+                  <label class="fl">Secteur</label>
+                  <select id="cc-secteur">
+                    <option value="">Sélectionner...</option>
+                    <option>Fintech / Paiement</option><option>Santé / Bien-être</option>
+                    <option>E-commerce</option><option>Food / Delivery</option>
+                    <option>Mobilité</option><option>Media / Entertainment</option>
+                    <option>Mode / Lifestyle</option><option>RH / Recrutement</option>
+                    <option>SaaS / Productivité</option><option>Autre</option>
+                  </select>
+                </div>
+              </div>
+              <div class="fg c1">
+                <div class="field">
+                  <label class="fl">Description produit / offre</label>
+                  <textarea id="cc-produit" placeholder="Décris le produit et la valeur pour l'étudiant..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><div class="card-title-icon">🎯</div> Objectif</div>
+              <div class="rc-grid c2">
+                <div class="rc on" data-g="cc-obj" data-v="téléchargement d'app" onclick="pickRc(this)">
+                  <div class="rc-title">📱 Téléchargement app</div>
+                  <div class="rc-sub">Installer et ouvrir</div>
+                </div>
+                <div class="rc" data-g="cc-obj" data-v="inscription / signup" onclick="pickRc(this)">
+                  <div class="rc-title">✍️ Inscription</div>
+                  <div class="rc-sub">Créer un compte</div>
+                </div>
+                <div class="rc" data-g="cc-obj" data-v="distribution promo / code" onclick="pickRc(this)">
+                  <div class="rc-title">🎁 Promo / code</div>
+                  <div class="rc-sub">Offre, sample, code</div>
+                </div>
+                <div class="rc" data-g="cc-obj" data-v="notoriété campus" onclick="pickRc(this)">
+                  <div class="rc-title">📣 Notoriété</div>
+                  <div class="rc-sub">Awareness campus</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><div class="card-title-icon">📍</div> Déploiement</div>
+              <div class="fg c2">
+                <div class="field">
+                  <label class="fl">Formule</label>
+                  <select id="cc-formule" onchange="updateDevisLive()">
+                    <option value="test">Test — 400€/ambas · 1 mois</option>
+                    <option value="semestre" selected>Semestre — 1 550€/ambas · 4 mois</option>
+                    <option value="annee">Année — 3 850€/ambas · 8 mois</option>
+                  </select>
+                </div>
+                <div class="field">
+                  <label class="fl">Nb ambassadeurs</label>
+                  <input type="number" id="cc-ambas" value="5" min="1" max="30">
+                </div>
+              </div>
+              <div class="fg c1">
+                <div class="field">
+                  <label class="fl">Villes et campus ciblés</label>
+                  <input type="text" id="cc-villes" placeholder="Paris (Dauphine, Sciences Po), Lyon (EM Lyon)...">
+                </div>
+                <div class="field">
+                  <label class="fl">Contraintes / ton / charte</label>
+                  <textarea id="cc-contraintes" placeholder="Ton, interdits, offre spéciale, durée..."></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="result-card">
+              <div class="rc-head">
+                <div class="rc-head-title">Plan de campagne généré</div>
+                <div class="rc-head-actions">
+                  <button class="copy-btn" id="cpbtn-campagne" style="display:none" onclick="copyText('campagne')">📋 Copier</button>
+                </div>
+              </div>
+              <div class="rc-body" id="out-campagne">
+                <div class="state-empty">
+                  <div class="state-empty-icon">🗺️</div>
+                  <div class="state-empty-text">Remplis le formulaire<br>et clique sur <strong>Générer</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         PAGE : FICHE MISSION
+    ══════════════════════════════════ -->
+    <div id="pg-fiche" class="page">
+      <div class="topbar">
+        <div class="tb-info">
+          <div class="tb-title">Fiche mission ambassadeur</div>
+          <div class="tb-sub">Script terrain · Do's &amp; don'ts · FAQ objections · Rapport quotidien</div>
+        </div>
+        <div class="tb-btns">
+          <button class="btn btn-outline" onclick="resetPage('fiche')">Réinitialiser</button>
+          <button class="btn btn-primary" id="cta-fiche" onclick="runFiche()">✨ Générer</button>
+        </div>
+      </div>
+      <div class="content">
+        <div id="alert-fiche" class="alert error"></div>
+        <div class="two-col">
+          <div>
+            <div class="card">
+              <div class="card-title"><div class="card-title-icon">🏢</div> La marque</div>
+              <div class="fg c2">
+                <div class="field">
+                  <label class="fl">Marque <span class="req">*</span></label>
+                  <input type="text" id="ff-marque" placeholder="Nom de la marque">
+                </div>
+                <div class="field">
+                  <label class="fl">Secteur</label>
+                  <select id="ff-secteur">
+                    <option value="">Sélectionner...</option>
+                    <option>Fintech / Paiement</option><option>Santé / Bien-être</option>
+                    <option>E-commerce</option><option>Food / Delivery</option>
+                    <option>SaaS / Productivité</option><option>Mode / Lifestyle</option><option>Autre</option>
+                  </select>
+                </div>
+              </div>
+              <div class="fg c1">
+                <div class="field">
+                  <label class="fl">Produit / offre <span class="req">*</span></label>
+                  <textarea id="ff-produit" placeholder="C'est quoi ? Valeur pour l'étudiant ? Offre spéciale ?"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><div class="card-title-icon">🎯</div> Objectif de la mission</div>
+              <div class="rc-grid c2">
+                <div class="rc on" data-g="ff-obj" data-v="faire télécharger l'app" onclick="pickRc(this)">
+                  <div class="rc-title">📱 Faire installer l'app</div>
+                </div>
+                <div class="rc" data-g="ff-obj" data-v="faire s'inscrire" onclick="pickRc(this)">
+                  <div class="rc-title">✍️ Faire s'inscrire</div>
+                </div>
+                <div class="rc" data-g="ff-obj" data-v="distribuer un code promo" onclick="pickRc(this)">
+                  <div class="rc-title">🎁 Distribuer un code promo</div>
+                </div>
+                <div class="rc" data-g="ff-obj" data-v="faire connaître la marque" onclick="pickRc(this)">
+                  <div class="rc-title">📣 Notoriété</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-title"><div class="card-title-icon">📍</div> Terrain</div>
+              <div class="fg c1">
+                <div class="field">
+                  <label class="fl">Lieux / campus ciblés</label>
+                  <input type="text" id="ff-lieux" placeholder="Campus Dauphine, RER B, cafét ESCP...">
+                </div>
+                <div class="field">
+                  <label class="fl">Contraintes et ton</label>
+                  <textarea id="ff-contraintes" placeholder="Ton décontracté, code CAMPUS20, offre valable 48h, ne pas citer les concurrents..."></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="result-card">
+              <div class="rc-head">
+                <div class="rc-head-title">Fiche mission générée</div>
+                <div class="rc-head-actions">
+                  <button class="copy-btn" id="cpbtn-fiche" style="display:none" onclick="copyText('fiche')">📋 Copier</button>
+                </div>
+              </div>
+              <div class="rc-body" id="out-fiche">
+                <div class="state-empty">
+                  <div class="state-empty-icon">📋</div>
+                  <div class="state-empty-text">Remplis le formulaire<br>et clique sur <strong>Générer</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════
+         PAGE : DEVIS
+    ══════════════════════════════════ -->
+    <div id="pg-devis" class="page">
+      <div class="topbar">
+        <div class="tb-info">
+          <div class="tb-title">Générateur de devis</div>
+          <div class="tb-sub">Budget exact + argumentaire commercial personnalisé par secteur</div>
+        </div>
+        <div class="tb-btns">
+          <button class="btn btn-outline" onclick="resetPage('devis')">Réinitialiser</button>
+          <button class="btn btn-primary" id="cta-devis" onclick="runDevis()">✨ Générer</button>
+        </div>
+      </div>
+      <div class="content">
+        <div id="alert-devis" class="alert error"></div>
+        <div class="two-col">
+          <div>
+            <div class="card">
+              <div class="card-title"><div class="card-title-icon">💶</div> Paramètres</div>
+              <div class="fg c2">
+                <div class="field">
+                  <label class="fl">Marque <span class="req">*</span></label>
+                  <input type="text" id="dd-marque" placeholder="Nom du client">
+                </div>
+                <div class="field">
+                  <label class="fl">Secteur</label>
+                  <select id="dd-secteur">
+                    <option value="">Sélectionner...</option>
+                    <option>Fintech / Paiement</option><option>Santé / Bien-être</option>
+                    <option>E-commerce</option><option>Food / Delivery</option>
+                    <option>SaaS / Productivité</option><option>Mode / Lifestyle</option>
+                    <option>RH / Recrutement</option><option>Autre</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="fg c1" style="margin-bottom:10px;">
+                <div class="field">
+                  <label class="fl">Formule</label>
+                  <div class="rc-grid c3">
+                    <div class="rc" data-g="dd-form" data-v="test" onclick="pickRc(this);calcDevis()">
+                      <div class="rc-title" style="font-size:12px">Test</div>
+                      <div class="rc-sub">400€ · 1 mois</div>
+                    </div>
+                    <div class="rc on" data-g="dd-form" data-v="semestre" onclick="pickRc(this);calcDevis()">
+                      <div class="rc-title" style="font-size:12px">Semestre ⭐</div>
+                      <div class="rc-sub">1 550€ · 4 mois</div>
+                    </div>
+                    <div class="rc" data-g="dd-form" data-v="annee" onclick="pickRc(this);calcDevis()">
+                      <div class="rc-title" style="font-size:12px">Année</div>
+                      <div class="rc-sub">3 850€ · 8 mois</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="fg c2">
+                <div class="field">
+                  <label class="fl">Nb ambassadeurs</label>
+                  <input type="number" id="dd-ambas" value="5" min="1" max="30" oninput="calcDevis()">
+                </div>
+                <div class="field">
+                  <label class="fl">Villes</label>
+                  <input type="text" id="dd-villes" placeholder="Paris, Lyon...">
+                </div>
+              </div>
+              <div class="fg c1">
+                <div class="field">
+                  <label class="fl">Objectif du client</label>
+                  <input type="text" id="dd-objectif" placeholder="ex: 500 nouveaux utilisateurs étudiants en 4 mois">
+                </div>
+              </div>
+
+              <div class="devis-recap" id="devis-recap"><!-- calc dynamique --></div>
+            </div>
+          </div>
+
+          <div>
+            <div class="result-card">
+              <div class="rc-head">
+                <div class="rc-head-title">Devis &amp; argumentaire générés</div>
+                <div class="rc-head-actions">
+                  <button class="copy-btn" id="cpbtn-devis" style="display:none" onclick="copyText('devis')">📋 Copier</button>
+                </div>
+              </div>
+              <div class="rc-body" id="out-devis">
+                <div class="state-empty">
+                  <div class="state-empty-icon">💶</div>
+                  <div class="state-empty-text">Configure le devis<br>et clique sur <strong>Générer</strong></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main -->
+</div><!-- /layout -->
+
+<script>
+// ── DATA ──
+const F = {
+  test:     {prix:400,   duree:1, label:"Formule Test",     dl:"1 mois"},
+  semestre: {prix:1550,  duree:4, label:"Formule Semestre", dl:"4 mois"},
+  annee:    {prix:3850,  duree:8, label:"Formule Année",    dl:"8 mois"},
+};
+
+// ── NAV ──
+function goPage(name, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('pg-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ── RADIO ──
+function pickRc(el) {
+  const g = el.dataset.g;
+  document.querySelectorAll('[data-g="' + g + '"]').forEach(c => c.classList.remove('on'));
+  el.classList.add('on');
+}
+function rcVal(g) {
+  const el = document.querySelector('[data-g="' + g + '"].on');
+  return el ? el.dataset.v : '';
+}
+
+// ── RESET ──
+function resetPage(name) {
+  const prefixes = {campagne:'cc', fiche:'ff', devis:'dd'};
+  const p = prefixes[name];
+  document.querySelectorAll('[id^="' + p + '-"]').forEach(el => {
+    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+      if (el.type === 'number') el.value = '5';
+      else el.value = '';
+    }
+    if (el.tagName === 'SELECT') el.selectedIndex = 0;
+  });
+  setOut(name, '<div class="state-empty"><div class="state-empty-icon">✨</div><div class="state-empty-text">Formulaire réinitialisé</div></div>');
+  showCopy(name, false);
+  hideAlert(name);
+}
+
+// ── OUTPUT HELPERS ──
+function setOut(name, html) {
+  document.getElementById('out-' + name).innerHTML = html;
+}
+function showCopy(name, show, text) {
+  const btn = document.getElementById('cpbtn-' + name);
+  btn.style.display = show ? 'inline-flex' : 'none';
+  if (text) btn.dataset.raw = text;
+}
+function showAlert(name, msg) {
+  const el = document.getElementById('alert-' + name);
+  el.textContent = msg;
+  el.classList.add('show');
+}
+function hideAlert(name) {
+  const el = document.getElementById('alert-' + name);
+  el.classList.remove('show');
+}
+function setLoading(name, loading) {
+  const btn = document.getElementById('cta-' + name);
+  btn.disabled = loading;
+  btn.textContent = loading ? '⏳ Génération...' : '✨ Regénérer';
+}
+
+// ── COPY ──
+function copyText(name) {
+  const btn = document.getElementById('cpbtn-' + name);
+  navigator.clipboard.writeText(btn.dataset.raw || '').then(() => {
+    btn.textContent = '✓ Copié !';
+    btn.classList.add('ok');
+    setTimeout(() => { btn.textContent = '📋 Copier'; btn.classList.remove('ok'); }, 2000);
+  });
+}
+
+// ── DEVIS CALC ──
+function calcDevis() {
+  const fk = rcVal('dd-form') || 'semestre';
+  const ambas = parseInt(document.getElementById('dd-ambas').value) || 5;
+  const f = F[fk];
+  const total = f.prix * ambas;
+  const parMois = Math.round(total / f.duree);
+  const acqLow = Math.round(ambas * f.duree * 4 * 200 * 0.30);
+  const acqHigh = Math.round(ambas * f.duree * 4 * 200 * 0.40);
+  document.getElementById('devis-recap').innerHTML =
+    '<div class="dr-row"><div class="dr-label">' + f.label + ' × ' + ambas + ' ambassadeur' + (ambas > 1 ? 's' : '') + '</div><div class="dr-val">' + total.toLocaleString('fr-FR') + ' €</div></div>' +
+    '<div class="dr-row"><div class="dr-label">Durée</div><div class="dr-val">' + f.dl + '</div></div>' +
+    '<div class="dr-row"><div class="dr-label">Soit / mois</div><div class="dr-val">' + parMois.toLocaleString('fr-FR') + ' €/mois</div></div>' +
+    '<div class="dr-row"><div class="dr-label">Acquisitions estimées*</div><div class="dr-val dr-acq">' + acqLow.toLocaleString('fr-FR') + ' – ' + acqHigh.toLocaleString('fr-FR') + '</div></div>' +
+    '<div class="dr-row"><div class="dr-label" style="color:var(--ink3);font-size:11px">*basé sur 200 contacts/ambas/semaine, taux 30-40%</div><div class="dr-total">' + total.toLocaleString('fr-FR') + ' €</div></div>';
+}
+
+// ── MARKDOWN → HTML ──
+function md(text) {
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/^## (.+)$/gm,'<h2>$1</h2>')
+    .replace(/^### (.+)$/gm,'<h3>$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/^[-•*] (.+)$/gm,'<li>$1</li>')
+    .replace(/(<li>[^]*?<\/li>\n?)+/g, s => '<ul>' + s + '</ul>')
+    .replace(/^---+$/gm,'<hr>')
+    .replace(/\n{2,}/g,'</p><p>')
+    .replace(/^(?!<[hup]|<li|<hr)(.+)$/gm, '<p>$1</p>')
+    .replace(/<p><\/p>/g,'');
+}
+
+// ── CALL CLAUDE ──
+async function claude(system, user, name) {
+  const key = document.getElementById('apikey').value.trim();
+  if (!key) { showAlert(name, 'Entre ta clé API Anthropic dans la sidebar (en bas à gauche).'); return; }
+
+  hideAlert(name);
+  setLoading(name, true);
+  showCopy(name, false);
+  setOut(name,
+    '<div class="state-loading">' +
+    '<div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>' +
+    '<div class="loading-text">Claude rédige...</div>' +
+    '</div>'
+  );
+
+  try {
+    const res = await fetch('/.netlify/functions/claude', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1800,
+        system: system,
+        messages: [{ role: 'user', content: user }]
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error ? err.error.message : 'Erreur API ' + res.status);
+    }
+
+    const data = await res.json();
+    const text = data.content && data.content[0] ? data.content[0].text : '';
+    if (!text) throw new Error('Réponse vide.');
+
+    setOut(name, '<div class="gen">' + md(text) + '</div>');
+    showCopy(name, true, text);
+
+  } catch(e) {
+    showAlert(name, 'Erreur : ' + e.message);
+    setOut(name, '<div class="state-empty"><div class="state-empty-icon">⚠️</div><div class="state-empty-text">' + e.message + '</div></div>');
+  } finally {
+    setLoading(name, false);
+  }
+}
+
+// ── MODULE : CAMPAGNE ──
+function runCampagne() {
+  const marque = document.getElementById('cc-marque').value.trim();
+  if (!marque) { showAlert('campagne', 'Le nom de la marque est obligatoire.'); return; }
+  const secteur    = document.getElementById('cc-secteur').value;
+  const produit    = document.getElementById('cc-produit').value.trim();
+  const obj        = rcVal('cc-obj') || 'téléchargement app';
+  const formuleKey = document.getElementById('cc-formule').value;
+  const ambas      = document.getElementById('cc-ambas').value;
+  const villes     = document.getElementById('cc-villes').value.trim();
+  const contraintes= document.getElementById('cc-contraintes').value.trim();
+  const f = F[formuleKey];
+  const budget = f.prix * parseInt(ambas);
+
+  const sys = "Tu es le responsable stratégie d'Ambassia, agence street-marketing Gen Z qui déploie des étudiants-ambassadeurs sur les campus français. Tu crées des plans de campagne concrets et actionnables. Réponds en français avec des titres ## et des listes à puces. Sois précis et opérationnel.";
+  const usr = "Crée un plan de campagne complet pour :\n\nMarque : " + marque + "\nSecteur : " + (secteur||'Non précisé') + "\nProduit / offre : " + (produit||'Non précisé') + "\nObjectif : " + obj + "\nFormule : " + f.label + " (" + f.prix + "€/ambassadeur · " + f.dl + ")\nNombre d'ambassadeurs : " + ambas + "\nBudget total : " + budget.toLocaleString('fr-FR') + "€\nVilles et campus : " + (villes||'Non précisé') + "\nContraintes / ton : " + (contraintes||'Aucune') + "\n\nStructure requise :\n## Résumé de la campagne\n## Profil ambassadeur idéal\n## Répartition par campus et ville\n## Planning semaine par semaine\n## Messages clés et accroche terrain\n## KPIs et objectifs chiffrés\n## Points d'attention";
+
+  claude(sys, usr, 'campagne');
+}
+
+// ── MODULE : FICHE MISSION ──
+function runFiche() {
+  const marque = document.getElementById('ff-marque').value.trim();
+  if (!marque) { showAlert('fiche', 'Le nom de la marque est obligatoire.'); return; }
+  const secteur    = document.getElementById('ff-secteur').value;
+  const produit    = document.getElementById('ff-produit').value.trim();
+  const obj        = rcVal('ff-obj') || "faire télécharger l'app";
+  const lieux      = document.getElementById('ff-lieux').value.trim();
+  const contraintes= document.getElementById('ff-contraintes').value.trim();
+
+  const sys = "Tu es le responsable formation d'Ambassia. Tu crées des fiches mission claires et motivantes pour les étudiants-ambassadeurs. Le ton est direct, dynamique, facile à lire sur mobile. Réponds en français avec des titres ## et des listes à puces.";
+  const usr = "Crée une fiche mission complète pour un ambassadeur Ambassia :\n\nMarque : " + marque + "\nSecteur : " + (secteur||'Non précisé') + "\nProduit / offre : " + (produit||'Non précisé') + "\nObjectif : " + obj + "\nLieux / campus : " + (lieux||'À définir') + "\nContraintes / ton : " + (contraintes||'Aucune') + "\n\nStructure requise :\n## La mission en une phrase\n## Ce que tu vas faire concrètement\n## Ton script d'accroche (3 versions courtes)\n## Les do's\n## Les don'ts\n## Réponses aux objections fréquentes\n## Ce que tu rapportes chaque jour";
+
+  claude(sys, usr, 'fiche');
+}
+
+// ── MODULE : DEVIS ──
+function runDevis() {
+  const marque = document.getElementById('dd-marque').value.trim();
+  if (!marque) { showAlert('devis', 'Le nom de la marque est obligatoire.'); return; }
+  const secteur  = document.getElementById('dd-secteur').value;
+  const fk       = rcVal('dd-form') || 'semestre';
+  const ambas    = parseInt(document.getElementById('dd-ambas').value) || 5;
+  const villes   = document.getElementById('dd-villes').value.trim();
+  const objectif = document.getElementById('dd-objectif').value.trim();
+  const f = F[fk];
+  const total = f.prix * ambas;
+  const parMois = Math.round(total / f.duree);
+  const acqLow  = Math.round(ambas * f.duree * 4 * 200 * 0.30);
+  const acqHigh = Math.round(ambas * f.duree * 4 * 200 * 0.40);
+
+  const sys = "Tu es commercial senior chez Ambassia, agence street-marketing Gen Z sur les campus français. Tu rédiges des devis professionnels et des argumentaires de vente personnalisés par secteur. Sois convaincant et adapté au secteur du client. Réponds en français avec des titres ## et des listes.";
+  const usr = "Rédige un devis commercial pour :\n\nClient : " + marque + "\nSecteur : " + (secteur||'Non précisé') + "\nFormule : " + f.label + "\nNb ambassadeurs : " + ambas + "\nDurée : " + f.dl + "\nBudget total : " + total.toLocaleString('fr-FR') + "€ TTC (" + parMois.toLocaleString('fr-FR') + "€/mois)\nVilles : " + (villes||'À définir') + "\nObjectif client : " + (objectif||'Non précisé') + "\nAcquisitions estimées : " + acqLow.toLocaleString('fr-FR') + " – " + acqHigh.toLocaleString('fr-FR') + " (200 contacts/ambas/semaine, taux 30-40%)\n\nStructure requise :\n## Proposition commerciale — " + marque + "\n## Ce qu'on fait pour vous\n## Détail de la prestation\n## Résultats attendus\n## Pourquoi Ambassia pour votre secteur\n## Prochaines étapes";
+
+  claude(sys, usr, 'devis');
+}
+
+// Init
+calcDevis();
+</script>
+</body>
+</html>
