@@ -686,9 +686,6 @@ function md(text) {
 
 // ── CALL CLAUDE ──
 async function claude(system, user, name) {
-  const key = document.getElementById('apikey').value.trim();
-  if (!key) { showAlert(name, 'Entre ta clé API Anthropic dans la sidebar (en bas à gauche).'); return; }
-
   hideAlert(name);
   setLoading(name, true);
   showCopy(name, false);
